@@ -1,0 +1,106 @@
+[
+{
+	"uri": "/vi/",
+	"title": "VPN Site to Site",
+	"tags": [],
+	"description": "",
+	"content": "Kết nối an toàn giữa On-Premis và AWS Tổng quan Trong bài lab này, bạn sẽ tìm hiểu các khái niệm cơ bản và thực hành về VPN Site to Sitet. Thực hành tạo kết nối đến máy chủ EC2 instance với on-premise device (trong bài viết này là máy chủ Linux) thông qua địa chỉ private IP. Trong bài viết này, mình sẽ mô phỏng các thiết bị on-prem bằng các AWS resource, nếu các bạn có các thiết bị on-prem, các bạn chỉ cần áp dụng những câu lệnh trong bài viết.\nNội dung Giới thiệu Chuẩn bị VPC và EC2 Tạo Customer Gateway Tạo Virtual Private Gateway Tạo VPN Site to Site Cấu hình Openswan Kiểm tra kết nối giữa 2 sites Dọn dẹp tài nguyên "
+},
+{
+	"uri": "/vi/1-introduce/",
+	"title": "Giới thiệu",
+	"tags": [],
+	"description": "",
+	"content": "Bạn đã bao giờ tự hỏi tại sao ở một số tổ chức bạn cần kết nối với VPN để sử dụng thông tin cá nhân của các văn phòng khác trong khi ở một số tổ chức khác, chỉ cần kết nối với mạng cục bộ là bạn có thể truy cập vào tất cả những thông tin đó?\nCâu trả lời cho câu hỏi này là tổ chức của bạn đã thiết lập mạng lưới giữa các văn phòng khác nhau như thế nào. Trong bài viết này, tôi sẽ hướng dẫn bạn cách thiết lập kết nối giữa các văn phòng hoặc mạng khác nhau theo cách mà các thành viên trong mạng của bạn không cần kết nối với VPN nếu họ muốn truy cập tài nguyên riêng của các văn phòng khác.\nTrong bài lab này sẽ hướng dẫn bạn kết nối cơ sở hạ tầng on-premise của bạn với AWS sử dụng VPN Site-to-Site, bạn không chỉ tăng cường bảo mật và tính bền vững của mạng, mà còn có khả năng tích hợp môi trường IT hiện tại của mình với các dịch vụ đám mây, mở rộng khả năng và sự đổi mới kinh doanh. Điều này làm cho AWS VPN Site-to-Site trở thành một giải pháp lý tưởng cho việc mở rộng nhanh chóng và an toàn, cung cấp một phương thức kết nối mạng đáng tin cậy giữa các môi trường on-premise và cloud.\n"
+},
+{
+	"uri": "/vi/2-createvpcandec2/2.2-createonpremvpc/",
+	"title": "Tạo On-prem VPC ",
+	"tags": [],
+	"description": "",
+	"content": "Tạo VPC On-prem VPC Truy cập giao diện quản trị dịch vụ VPC Click Your VPC. Click Create VPC. Tại trang Create VPC. Tại mục Resources to create chọn VPC and more. Tại mục Auto-generate điền: On-prem VPC. Tại mục IPv4 CIDR block điền: 192.169.0.0/16. Tại mục Number of Availability Zones(AZs) chọn 1. Tại mục Number of public subnet chọn 1. Tại mục Number of private subnet chọn 0. Tại mục VPC endpoints chọn None. Chọn Create VPC "
+},
+{
+	"uri": "/vi/2-createvpcandec2/",
+	"title": "Chuẩn bị VPC và EC2",
+	"tags": [],
+	"description": "",
+	"content": "\rĐể kết nối mạng VPN với mạng on premise datacenter bằng VPN Site to Site,bạn cần phải biết dải mạng on-premise data center của mình. Trong bài viết này, tôi mô phỏng datacenter bằng các AWS resource. Mục đích bài viết này là giúp bạn hiểu cách kết nối mạng VPC AWS với mạng on premise bằng dịch vụ VPN Site to Site.\nTrong bước này, chúng ta sẽ cần tạo một VPC có 2 subnet public / private. Sau đó tạo 1 EC2 Instance Linux nằm trong public subnet, 1 EC2 Instance Windows nằm trong private subnet.\nTổng quan kiến trúc sau khi các bạn hoàn tất bước này sẽ như sau:\nĐể tìm hiểu cách tạo các EC2 instance và VPC với public/private subnet các bạn có thể tham khảo bài lab :\nGiới thiệu về Amazon EC2 Làm việc với Amazon VPC Nội dung Tạo On-prem VPC Tạo AWS VPC Tạo EC2 instance trên AWS-VPC Tạo Openswan instance trên On-prem VPC "
+},
+{
+	"uri": "/vi/2-createvpcandec2/2.1-createawsvpc/",
+	"title": "Tạo AWS VPC ",
+	"tags": [],
+	"description": "",
+	"content": "Tạo AWS VPC Truy cập giao diện quản trị dịch vụ VPC Click Your VPC. Click Create VPC. Tại trang Create VPC. Tại mục Resources to create chọn VPC and more. Tại mục Auto-generate điền: AWS-VPC. Tại mục IPv4 CIDR block điền: 10.1.0.0/16. Tại mục Number of Availability Zones(AZs) chọn 1. Tại mục Number of public subnet chọn 1. Tại mục Number of private subnet chọn 0. Tại mục VPC endpoints chọn None. Chọn Create VPC "
+},
+{
+	"uri": "/vi/3-createcustomergateway/",
+	"title": "Tạo Customer Gateway",
+	"tags": [],
+	"description": "",
+	"content": "Customer Gateway trong AWS là một tài nguyên mạng ảo dùng để đại diện cho cổng kết nối của bạn trong một mạng tại văn phòng hoặc trung tâm dữ liệu tới AWS. Nó cho phép bạn thiết lập một kết nối VPN (Virtual Private Network) từ mạng nội bộ của bạn đến VPC (Virtual Private Cloud) của bạn trên AWS, tạo điều kiện cho việc truyền dữ liệu được bảo mật giữa hai điểm này.\nKhi bạn tạo Customer Gateway, bạn sẽ cung cấp các thông tin như địa chỉ IP công cộng (do ISP cấp) của mạng bạn muốn kết nối và chọn loại định tuyến - tĩnh hoặc động. Customer Gateway là một phần cần thiết của kết nối VPN giữa mạng riêng của bạn và mạng AWS của bạn, cho phép bạn quản lý truy cập và dữ liệu một cách an toàn.\nTrong bài viết này, vì tôi lấy Openswan EC2 instance để mô phỏng cho thiết bị on-prem nên địa chỉ public IP cho Customer Gate sẽ là public IP của Openswan instance, với trường hợp của tôi nó là 3.35.207.65\nTạo Customer Gateway Truy cập giao diện quản trị dịch vụ VPC Tại mục Virtual private network (VPN), chọn Customer Gateway Tại mục Name tag, điền my-cgw Tại mục IP address, điền public IP của thiết bị on premise của bạn, trong trường của tôi là địa chỉ public IP của Openswan instance 3.35.207.65 "
+},
+{
+	"uri": "/vi/4-createvgw/",
+	"title": "Tạo Virtual Private Gateway",
+	"tags": [],
+	"description": "",
+	"content": "Virtual Private Gateway (VPG) trong AWS là một điểm kết nối tại phía AWS cho một Virtual Private Network (VPN) giữa mạng riêng của bạn và Amazon Virtual Private Cloud (VPC) của bạn. Nó hoạt động như một cổng ngõ VPN mà bạn có thể gắn với một hoặc nhiều VPCs, cho phép truyền dữ liệu an toàn giữa mạng riêng của doanh nghiệp và mạng trên đám mây của AWS.\nVirtual Private Gateway quản lý kết nối VPN IPSec và hỗ trợ việc tạo ra các kết nối an toàn và mã hóa. Bạn có thể thiết lập nhiều kết nối VPN qua cùng một VPG, điều này hữu ích cho việc thiết lập các kết nối dự phòng và đảm bảo sự liên tục của dịch vụ. VPG thường được sử dụng cùng với Customer Gateway, đó là thành phần ở phía khách hàng, để tạo nên một kết nối VPN đầy đủ từ mạng của bạn đến AWS.\nTạo Virtual Private Gateway Khởi tạo Virutal Private Gateway Truy cập giao diện quản trị dịch vụ VPC Tại mục Virtual private network (VPN), chọn Virtual Private Gateways Gắn Virutal Private Gateway vào AWS-VPC Chọn AWS-VPC Chọn Actions Chọn Attach to VPC Chọn AWS-VPC Chọn Attach to VPC Điều chỉnh Route table của AWS VPC Chọn AWS VPC Chọn Edit routes Chọn Add route Nhập dải địa chỉ mạng On-prem 192.169.0.0/16 Tại mục Target, chọn Virtual Privat Gateway và chọn ID của my-vpgw Chọn Save changes "
+},
+{
+	"uri": "/vi/5-createvpns2s/",
+	"title": "Tạo VPN Site to Site",
+	"tags": [],
+	"description": "",
+	"content": "VPN Site-to-Site là một giải pháp mạng tiên tiến, cho phép kết nối an toàn giữa các mạng tại nhiều địa điểm khác nhau thông qua Internet công cộng. Sử dụng mã hoá end-to-end và giao thức IPSec, VPN này đảm bảo rằng dữ liệu truyền đi được bảo vệ một cách mạnh mẽ, ngay cả trên mạng công cộng. Điều này không những giúp tiết kiệm chi phí đáng kể so với việc xây dựng đường truyền riêng biệt mà còn mang lại sự linh hoạt và khả năng mở rộng cao cho tổ chức, đồng thời tăng cường bảo mật dữ liệu và kiểm soát truy cập. VPN Site-to-Site là lựa chọn lý tưởng cho các tổ chức cần bảo đảm liên tục và ổn định cho các dịch vụ và ứng dụng quan trọng, với khả năng quản lý tập trung qua giao diện quản trị mạng.\nTạo VPN Site to Site Khởi tạo VPN Site to Site Truy cập giao diện quản trị dịch vụ VPC Tại mục Virtual private network (VPN), chọn Site-to-Site VPN connections Chọn Create VPN connection Tại mục Name tag, điền my-vpn Chọn Virtual private gateway Chọn my-vpgw Chọn Customer Gateway Chọn my-cgw Tại mục Routing options, chọn Static Tại mục Local IPv4 network CIDR, nhập 192.169.0.0/16 Tại mục Remote IPv4 network CIDR, nhập 10.1.0.0/16 Tải configuration file của VPN Đợi cho đến khi là status là Available Chọn vào VPN ID Chọn vào Download configuration Tại mục Vendor, chọn Openswan Chọn Download "
+},
+{
+	"uri": "/vi/2-createvpcandec2/2.3-createsec2inawsvpc/",
+	"title": "Tạo EC2 instance trên AWS-VPC",
+	"tags": [],
+	"description": "",
+	"content": "Tạo EC2 instance trên AWS-VPC Trong bước này chúng ta sẽ tạo 1 EC2 instance trong AWS-VPC và tạo 1 Security Group mới cho phép tất cả lưu lượng đi qua\nTruy cập giao diện dịch vụ EC2 Click Launch instance. Tại mục Name, điền ec2 Tại mục Amazon Machine Image (AMI), chọn Amazon Linux 2 AMI (HVM) - Kernel 5.10, SSD Volume Type Tại mục Key pair name, chọn key-pair của bạn Tại mục Network setting, edit: Tại mục VPC, chọn AWS-VPC Tại mục Auto-assign public IP, chọn Enable Chọn Create security group, điền Security group name và Description Chọn Add security group rule, tại mục Type chọn All traffic, tại mục Source type chọn Anywhere "
+},
+{
+	"uri": "/vi/2-createvpcandec2/2.4-createopenswaninstance/",
+	"title": "Tạo Openswan instance trên On-prem VPC",
+	"tags": [],
+	"description": "",
+	"content": "Máy chủ Openswan Máy chủ Openswan là một máy chủ được cài đặt và cấu hình để triển khai và quản lý kết nối mạng an toàn sử dụng giao thức IPsec. Nhiệm vụ chính của máy chủ Openswan là:\nThiết lập kết nối an toàn: Máy chủ Openswan tạo ra các kết nối an toàn giữa các mạng hoặc các thiết bị khác nhau. Điều này đảm bảo rằng thông tin truyền qua mạng được mã hóa và chỉ có những bên được xác thực mới có thể truy cập vào nó. Xác thực và mã hóa dữ liệu: Máy chủ Openswan sử dụng các phương thức xác thực như chứng chỉ số, mã hóa khóa công khai và chứng thực mật khẩu để đảm bảo tính toàn vẹn và bảo mật dữ liệu trong quá trình truyền. Quản lý khóa: Máy chủ Openswan quản lý các khóa bí mật để thiết lập kết nối an toàn. Nó sử dụng các giao thức khóa như Internet Key Exchange (IKE) để trao đổi và quản lý khóa này. Giám sát và bảo trì kết nối: Máy chủ Openswan giám sát các kết nối IPsec và cung cấp các công cụ để theo dõi và quản lý chúng. Điều này bao gồm việc kiểm tra trạng thái kết nối, xác định lỗi và sửa chữa khi cần thiết. Tóm lại, máy chủ Openswan là một máy chủ được sử dụng để tạo, quản lý và duy trì các kết nối mạng an toàn sử dụng giao thức IPsec, đảm bảo tính bảo mật và toàn vẹn dữ liệu trong quá trình truyền.\nTruy cập giao diện dịch vụ EC2 Click Launch instance. Tại mục Name, điền Openswan-server Tại mục Amazon Machine Image (AMI), chọn Amazon Linux 2 AMI (HVM) - Kernel 5.10, SSD Volume Type Tại Instance type, chọn t2.medium Tại mục Key pair name, chọn key-pair của bạn Tại mục Network setting, edit: Tại mục VPC, chọn AWS-VPC Tại mục Auto-assign public IP, chọn Enable Chọn Create security group, điền Security group name và Description Chọn Add security group rule, tại mục Type chọn All traffic, tại mục Source type chọn Anywhere Cập nhật Route Table của On-prem VPC.\nChọn On-prem VPC Chọn On-prem VPC-rtb-public Chọn Edit Chọn Add route Nhập dải địa chỉ của AWS-VPC là 10.1.0.0/16 Chọn Target là Openswan instance Chọn Save changes SSH vào Openswan-server instance và cài đặt Openswan\nChọn Openswan instance và chọn Connect Chọn Connect sudo -i yum install openswan -y\n"
+},
+{
+	"uri": "/vi/6-configureopenswan/",
+	"title": "Openswan Configuration",
+	"tags": [],
+	"description": "",
+	"content": "A Site-to-Site VPN is an advanced network solution, allowing for secure connections between networks at different locations over the public Internet. Utilizing end-to-end encryption and the IPSec protocol, this VPN ensures that data transmitted is robustly protected, even over public networks. This not only significantly saves costs compared to building separate lines but also provides flexibility and high scalability for organizations, while enhancing data security and access control. A Site-to-Site VPN is the ideal choice for organizations needing to ensure continuous and stable services and applications, with the ability to manage centrally through the network administration interface.\nOpenswan Configuration SSH into the Openswan-server instance and install Openswan\nSelect the Openswan instance and choose Connect Choose Connect Configure the Openswan server according to the newly downloaded configuration file\nOpen the file /etc/sysctl.conf using the command vi /etc/sysctl.conf and enter: net.ipv4.ip_forward = 1 net.ipv4.conf.default.rp_filter = 0\nnet.ipv4.conf.default.accept_source_route = 0\nSave and exit ESC + :wq Apply with the command: sysctl -p\nOpen the file /etc/ipsec.d/aws.conf using the command vi /etc/sysctl.conf, note that you will need to remove the line auth=esp in the configuration file, as follows:\nconn Tunnel1 authby=secret auto=start left=%defaultroute leftid=3.35.207.65 # your left id in your configuration file right=52.78.53.14 # your right id configuration file type=tunnel ikelifetime=8h keylife=1h phase2alg=aes128-sha1;modp1024 ike=aes128-sha1;modp1024 keyingtries=%forever keyexchange=ike leftsubnet=192.169.0.0/16 #\u0026lt;LOCAL NETWORK\u0026gt; rightsubnet=10.1.0.0/16 #\u0026lt;REMOTE NETWORK\u0026gt; dpddelay=10 dpdtimeout=30 dpdaction=restart_by_peer Open the file /etc/ipsec.d/aws.secrets using the command: vi /etc/ipsec.d/aws.secrets, and enter your secret line from the configuration file: Save and exit with the command: ESC + :wq Now start the IPSec service and verify it is running with the commands: systemctl start ipsec systemctl status ipsec Now, if you go to my-vpn and check under Tunnel details, for Tunnel 1 the status will be UP\n"
+},
+{
+	"uri": "/vi/7-testconnection/",
+	"title": "Kiểm tra kết nối giữa 2 sites",
+	"tags": [],
+	"description": "",
+	"content": "Tới đây chúng ta đã thiết lập xong, phần này chúng ta kiểm tra kết nối giữa 2 sites bằng địa chỉ private IP\nKhởi tạo 1 EC2 instance mới trong On-prem VPC Truy cập giao diện dịch vụ EC2 Click Launch instance. Tại mục Name, điền physical-machine Tại mục Amazon Machine Image (AMI), chọn Amazon Linux 2 AMI (HVM) - Kernel 5.10, SSD Volume Type Tại mục Key pair name, chọn key-pair của bạn Tại mục Network setting, edit: Tại mục VPC, chọn On-prem VPC Tại mục Auto-assign public IP, chọn Enable Chọn Create security group, chọn my-sg Chọn Launch instance Chúng ta SSH vào instance tại On-prem VPC và AWS VPC và ping cho nhau bằng private IP, kết quả như sau: "
+},
+{
+	"uri": "/vi/8-cleanup/",
+	"title": "Dọn dẹp tài nguyên  ",
+	"tags": [],
+	"description": "",
+	"content": "Chúng ta sẽ tiến hành các bước sau để xóa các tài nguyên chúng ta đã tạo trong bài thực hành này.\nXóa VPN Site-to-Site connections Chọn Site-to-Site VPN connections Chọn my-vpn Chọn Actions Chọn Delete VPN connection Xóa Customer Gateway Chọn Customer Gateway Chọn my-cgw Chọn Actions Chọn Delete customer gateway Xóa Virtual Private Gateway Chọn Virtual Private Gateway Chọn my-vpgw Chọn Detach from VPC Chọn Delete virtual private gateway Xóa EC2 instance Chọn EC2 Chọn ec2 và Openswan-server instances Chọn Instance state Chọn Terminate instance "
+},
+{
+	"uri": "/vi/categories/",
+	"title": "Categories",
+	"tags": [],
+	"description": "",
+	"content": ""
+},
+{
+	"uri": "/vi/tags/",
+	"title": "Tags",
+	"tags": [],
+	"description": "",
+	"content": ""
+}]

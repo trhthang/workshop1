@@ -1,0 +1,106 @@
+[
+{
+	"uri": "/",
+	"title": "VPN Site to Site",
+	"tags": [],
+	"description": "",
+	"content": "Secure Connection between On-Premises and AWS Overview In this lab, you will learn about the basic concepts and practice on VPN Site to Site. You will practice creating a connection to an EC2 instance with an on-premise device (in this article, a Linux server) through the private IP address. In this article, I will simulate on-prem devices using AWS resources, if you have on-prem devices, you just need to apply the commands in this article.\nContent Introduction Prepare VPC and EC2 Create Customer Gateway Create Virtual Private Gateway Create VPN Site to Site Configure Openswan Test Connection between 2 sites Cleanup Resources "
+},
+{
+	"uri": "/2-createvpcandec2/2.2-createonpremvpc/",
+	"title": "Create On-prem VPC",
+	"tags": [],
+	"description": "",
+	"content": "Create VPC On-prem VPC Access the VPC service management interface Click Your VPC. Click Create VPC. At the Create VPC page. In the Resources to create section, select VPC and more. In the Auto-generate field, enter: On-prem VPC. In the IPv4 CIDR block field, enter: 192.169.0.0/16. In the Number of Availability Zones(AZs) section, select 1. In the Number of public subnet section, select 1. In the Number of private subnet section, select 0. In the VPC endpoints section, select None. Select Create VPC "
+},
+{
+	"uri": "/1-introduce/",
+	"title": "Introduction",
+	"tags": [],
+	"description": "",
+	"content": "Have you ever wondered why in some organizations you need to connect to a VPN to use the personal information of other offices, while in other organizations, just connecting to the local network allows you to access all that information?\nThe answer to this question lies in how your organization has set up the network among different offices. In this article, I will guide you on how to establish connections between different offices or networks in such a way that members of your network do not need to connect to a VPN if they want to access private resources of other offices.\nThis lab will guide you on connecting your on-premise infrastructure with AWS using VPN Site-to-Site. Not only does this enhance the security and resilience of your network, but it also allows you to integrate your current IT environment with cloud services, expanding capabilities and business innovation. This makes AWS VPN Site-to-Site an ideal solution for secure and rapid expansion, providing a reliable networking method between on-premise and cloud environments.\n"
+},
+{
+	"uri": "/2-createvpcandec2/2.1-createawsvpc/",
+	"title": "Create AWS VPC",
+	"tags": [],
+	"description": "",
+	"content": "Create AWS VPC Access the VPC service management interface Click Your VPC. Click Create VPC. At the Create VPC page. In the Resources to create section, select VPC and more. In the Auto-generate field, enter: AWS-VPC. In the IPv4 CIDR block field, enter: 10.1.0.0/16. In the Number of Availability Zones(AZs) section, select 1. In the Number of public subnet section, select 1. In the Number of private subnet section, select 0. In the VPC endpoints section, select None. Select Create VPC "
+},
+{
+	"uri": "/2-createvpcandec2/",
+	"title": "Preparing VPC and EC2",
+	"tags": [],
+	"description": "",
+	"content": "\rTo connect a VPN network with an on-premise datacenter using Site to Site VPN, you need to know your on-premise data center\u0026rsquo;s network range. In this article, I simulate a datacenter using AWS resources. The purpose of this article is to help you understand how to connect an AWS VPC network with an on-premise network using the Site to Site VPN service.\nIn this step, we will need to create a VPC with 2 subnets: public and private. Then, create 1 Linux EC2 Instance in the public subnet, and 1 Windows EC2 Instance in the private subnet.\nThe architecture overview after you complete this step will be as follows:\nTo learn how to create EC2 instances and a VPC with public/private subnets, you can refer to the lab:\nIntroduction to Amazon EC2 Working with Amazon VPC Contents Create On-prem VPC Create AWS VPC Create EC2 instance on AWS-VPC Create Openswan instance on On-prem VPC "
+},
+{
+	"uri": "/3-createcustomergateway/",
+	"title": "Create Customer Gateway",
+	"tags": [],
+	"description": "",
+	"content": "A Customer Gateway in AWS is a virtual network resource used to represent your gateway in a network at your office or data center to AWS. It allows you to establish a VPN (Virtual Private Network) connection from your internal network to your VPC (Virtual Private Cloud) on AWS, facilitating secure data transmission between these two points.\nWhen creating a Customer Gateway, you will provide details such as the public IP address (provided by your ISP) of the network you want to connect to and choose the type of routing - static or dynamic. The Customer Gateway is an essential part of the VPN connection between your private network and your AWS network, allowing you to manage access and data securely.\nIn this article, since I am using an Openswan EC2 instance to simulate an on-prem device, the public IP for the Customer Gateway will be the public IP of the Openswan instance, which in my case is 3.35.207.65.\nCreate Customer Gateway Access the VPC service management interface In the Virtual private network (VPN) section, select Customer Gateway In the Name tag field, enter my-cgw In the IP address field, enter the public IP of your on-premise device, in my case, the public IP of the Openswan instance 3.35.207.65 "
+},
+{
+	"uri": "/4-createvgw/",
+	"title": "Create Virtual Private Gateway",
+	"tags": [],
+	"description": "",
+	"content": "The Virtual Private Gateway (VPG) in AWS is a connection point on the AWS side for a Virtual Private Network (VPN) between your private network and your Amazon Virtual Private Cloud (VPC). It acts as a VPN gateway that you can attach to one or more VPCs, allowing secure data transmission between the enterprise\u0026rsquo;s private network and AWS\u0026rsquo;s cloud network.\nThe Virtual Private Gateway manages VPN IPSec connections and supports the creation of secure, encrypted connections. You can set up multiple VPN connections through the same VPG, which is useful for establishing redundant connections and ensuring service continuity. VPG is often used in conjunction with a Customer Gateway, which is the customer-side component, to form a complete VPN connection from your network to AWS.\nCreate Virtual Private Gateway Initialize Virtual Private Gateway Access the VPC service management interface In the Virtual private network (VPN) section, select Virtual Private Gateways Attach Virtual Private Gateway to AWS-VPC Select AWS-VPC Choose Actions Select Attach to VPC Select AWS-VPC Choose Attach to VPC Adjust the Route table of AWS VPC Select AWS VPC Choose Edit routes Select Add route Enter the On-prem network address range 192.169.0.0/16 In the Target section, select Virtual Private Gateway and choose the ID of my-vpgw Select Save changes "
+},
+{
+	"uri": "/5-createvpns2s/",
+	"title": "Create VPN Site to Site",
+	"tags": [],
+	"description": "",
+	"content": "VPN Site-to-Site is an advanced networking solution that enables secure connections between networks at different locations over the public Internet. Using end-to-end encryption and the IPSec protocol, this VPN ensures that transmitted data is robustly protected, even over public networks. This not only saves significant costs compared to building separate dedicated lines but also offers high flexibility and scalability for organizations, while enhancing data security and access control. VPN Site-to-Site is an ideal choice for organizations needing to ensure continuity and stability for critical services and applications, with centralized management through a network administration interface.\nCreate VPN Site to Site Initialize VPN Site to Site Access the VPC service management interface In the Virtual private network (VPN) section, select Site-to-Site VPN connections Select Create VPN connection In the Name tag field, enter my-vpn Choose Virtual private gateway Select my-vpgw Choose Customer Gateway Select my-cgw In the Routing options section, choose Static In the Local IPv4 network CIDR field, enter 192.169.0.0/16 In the Remote IPv4 network CIDR field, enter 10.1.0.0/16 Download the VPN configuration file Wait until the status is Available Click on the VPN ID Click on Download configuration In the Vendor section, select Openswan Click Download "
+},
+{
+	"uri": "/2-createvpcandec2/2.3-createsec2inawsvpc/",
+	"title": "Create EC2 Instance on AWS-VPC",
+	"tags": [],
+	"description": "",
+	"content": "Create EC2 Instance on AWS-VPC In this step, we will create an EC2 instance within AWS-VPC and create a new Security Group that allows all traffic through.\nAccess the EC2 service interface Click Launch instance. In the Name field, enter ec2 In the Amazon Machine Image (AMI) section, select Amazon Linux 2 AMI (HVM) - Kernel 5.10, SSD Volume Type In the Key pair name section, select your key-pair In the Network setting, edit: In the VPC section, select AWS-VPC In the Auto-assign public IP section, select Enable Choose Create security group, enter Security group name and Description Choose Add security group rule, in the Type section select All traffic, in the Source type select Anywhere "
+},
+{
+	"uri": "/2-createvpcandec2/2.4-createopenswaninstance/",
+	"title": "Create Openswan Instance on On-prem VPC",
+	"tags": [],
+	"description": "",
+	"content": "Openswan Server The Openswan server is a server installed and configured to deploy and manage secure network connections using the IPsec protocol. The main tasks of the Openswan server are:\nEstablishing secure connections: The Openswan server creates secure connections between different networks or devices. This ensures that information transmitted over the network is encrypted and only authenticated parties can access it. Authenticating and encrypting data: The Openswan server uses authentication methods such as digital certificates, public key encryption, and password authentication to ensure data integrity and security during transmission. Managing keys: The Openswan server manages secret keys to establish secure connections. It uses key exchange protocols such as Internet Key Exchange (IKE) to exchange and manage these keys. Monitoring and maintaining connections: The Openswan server monitors IPsec connections and provides tools for monitoring and managing them. This includes checking connection status, identifying and fixing errors as necessary. In summary, the Openswan server is a server used to create, manage, and maintain secure network connections using the IPsec protocol, ensuring data security and integrity during transmission.\nAccess the EC2 service interface Click Launch instance. In the Name field, enter Openswan-server In the Amazon Machine Image (AMI) section, select Amazon Linux 2 AMI (HVM) - Kernel 5.10, SSD Volume Type In the Instance type section, select t2.medium In the Key pair name section, select your key-pair In the Network setting, edit: In the VPC section, select On-prem VPC In the Auto-assign public IP section, select Enable Choose Create security group, enter Security group name and Description Choose Add security group rule, in the Type section select All traffic, in the Source type select Anywhere Update the Route Table of On-prem VPC.\nSelect On-prem VPC Select On-prem VPC-rtb-public Select Edit Select Add route Enter the address range of AWS-VPC as 10.1.0.0/16 Choose Target as Openswan instance Select Save changes SSH into Openswan-server instance and install Openswan\nSelect Openswan instance and choose Connect Select Connect sudo -i yum install openswan -y\n"
+},
+{
+	"uri": "/6-configureopenswan/",
+	"title": "Clean up resources",
+	"tags": [],
+	"description": "",
+	"content": "We will take the following steps to delete the resources we created in this exercise.\nDelete EC2 instance Go to EC2 service management console\nClick Instances. Select both Public Linux Instance and Private Windows Instance instances. Click Instance state. Click Terminate instance, then click Terminate to confirm. Go to IAM service management console\nClick Roles. In the search box, enter SSM. Click to select SSM-Role. Click Delete, then enter the role name SSM-Role and click Delete to delete the role. Click Users. Click on user Portfwd. Click Delete, then enter the user name Portfwd and click Delete to delete the user. Delete S3 bucket Access System Manager - Session Manager service management console.\nClick the Preferences tab. Click Edit. Scroll down. In the section S3 logging. Uncheck Enable to disable logging. Scroll down. Click Save. Go to S3 service management console\nClick on the S3 bucket we created for this lab. (Example: lab-fcj-bucket-0001 ) Click Empty. Enter permanently delete, then click Empty to proceed to delete the object in the bucket. Click Exit. After deleting all objects in the bucket, click Delete\nEnter the name of the S3 bucket, then click Delete bucket to proceed with deleting the S3 bucket. Delete VPC Endpoints Go to VPC service management console Click Endpoints. Select the 4 endpoints we created for the lab including SSM, SSMMESSAGES, EC2MESSAGES, S3GW. Click Actions. Click Delete VPC endpoints. In the confirm box, enter delete.\nClick Delete to proceed with deleting endpoints. Click the refresh icon, check that all endpoints have been deleted before proceeding to the next step.\nDelete VPC Go to VPC service management console\nClick Your VPCs. Click on Lab VPC. Click Actions. Click Delete VPC. In the confirm box, enter delete to confirm, click Delete to delete Lab VPC and related resources.\n"
+},
+{
+	"uri": "/7-testconnection/",
+	"title": "Testing Connection Between Two Sites",
+	"tags": [],
+	"description": "",
+	"content": "By now, we have completed the setup. In this part, we will test the connection between the two sites using private IP addresses.\nLaunching a new EC2 instance in the On-prem VPC Access the EC2 service interface Click Launch instance. In the Name field, enter physical-machine In the Amazon Machine Image (AMI) section, select Amazon Linux 2 AMI (HVM) - Kernel 5.10, SSD Volume Type In the Key pair name section, choose your key-pair In the Network setting, edit: In the VPC section, choose On-prem VPC In the Auto-assign public IP section, choose Enable Choose Create security group, select my-sg Choose Launch instance We SSH into the instance in the On-prem VPC and AWS VPC and ping each other using private IP, resulting in the following: "
+},
+{
+	"uri": "/8-cleanup/",
+	"title": "Resource Cleanup",
+	"tags": [],
+	"description": "",
+	"content": "We will proceed with the following steps to delete the resources we have created in this practice.\nDelete VPN Site-to-Site connections Select Site-to-Site VPN connections Select my-vpn Choose Actions Select Delete VPN connection Delete Customer Gateway Select Customer Gateway Select my-cgw Choose Actions Select Delete customer gateway Delete Virtual Private Gateway Select Virtual Private Gateway Select my-vpgw Choose Detach from VPC Select Delete virtual private gateway Delete EC2 instances Select EC2 Select ec2 and Openswan-server instances Choose Instance state Select Terminate instance "
+},
+{
+	"uri": "/categories/",
+	"title": "Categories",
+	"tags": [],
+	"description": "",
+	"content": ""
+},
+{
+	"uri": "/tags/",
+	"title": "Tags",
+	"tags": [],
+	"description": "",
+	"content": ""
+}]
